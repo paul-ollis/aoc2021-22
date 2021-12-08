@@ -1,4 +1,4 @@
-"""Paul's solution for AOC day 6."""
+"""Paul's solution for AOC day 7."""
 
 from collections import Counter
 from typing import Counter as CounterType, Dict
