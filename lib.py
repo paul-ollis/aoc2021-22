@@ -17,3 +17,16 @@ def data_lines(py_file_name: str) -> Iterator[str]:
     data = os.environ.get('AOC_DEVEL', 'data')
     with open(f'{data}/{Path(py_file_name).stem}.txt', encoding='utf8') as f:
         yield from f
+
+
+def windowize(seq, n):
+    """Turn a sequence into overlapping windows of n items.
+
+    For example, given n = 3 and a, b, c, d, e, f, ... The sequence (a, b, c),
+    (b, c, d), (c, d, e), ... is produced.
+    """
+    iterators = [iter(seq) for _ in range(n)]
+    for i, it in enumerate(iterators):
+        for _ in range(i):
+            next(it)
+    return zip(*iterators)
