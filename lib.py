@@ -1,5 +1,6 @@
 """Some common code for the Advent of Code puxxle solvers."""
 
+import os
 from pathlib import Path
 from typing import Iterator
 
@@ -13,5 +14,6 @@ def data_lines(py_file_name: str) -> Iterator[str]:
 
     :py_file_name: The name of the solver;s python file.
     """
-    with open(f'data/{Path(py_file_name).stem}.txt', encoding='utf8') as f:
+    data = os.environ.get('AOC_DEVEL', 'data')
+    with open(f'{data}/{Path(py_file_name).stem}.txt', encoding='utf8') as f:
         yield from f

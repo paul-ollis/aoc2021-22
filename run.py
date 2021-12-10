@@ -4,12 +4,14 @@ This will run puzzle scripts and verify that the solution is correct.
 """
 
 import argparse
+import os
 import subprocess
 from pathlib import Path
 
 solutions = {
     'day1': (1709, 1761),
     'day2': (1813801, 1960569556),
+    'day8': (321, 1028926),
 }
 
 
@@ -19,8 +21,12 @@ def run_solvers(args):
     def lines(output):
         yield from (f'{line}' for line in output.decode().splitlines())
 
-    solvers = args.solver
-    if not solvers:
+    if args.devel:
+        os.environ['AOC_DEVEL'] = 'dev_data'
+
+    if args.solver:
+        solvers = [args.solver]
+    else:
         solvers = Path('.').glob('day*.py')
     for py_file in sorted(solvers):
         expected = solutions.get(py_file.stem, (None, None))
@@ -34,6 +40,8 @@ def run_solvers(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Run one or all scripts')
     parser.add_argument(
-        'solver', type=str, nargs='?', help='The name os a solver script')
+        'solver', type=Path, nargs='?', help='The name os a solver script')
+    parser.add_argument(
+        '-d', '--devel', action='store_true', help='Use development data')
     cmd_args = parser.parse_args()
     run_solvers(cmd_args)
