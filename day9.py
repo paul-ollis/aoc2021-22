@@ -45,7 +45,6 @@ def find_basin_heighbours(floor_heights, r, c, known):
     The caller must not call this for edge points. This will not yield edge
     points.
     """
-    # pylint: disable=dangerous-default-value
     v = floor_heights[r][c]
 
     for rn, cn in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
