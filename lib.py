@@ -1,8 +1,10 @@
-"""Some common code for the Advent of Code puxxle solvers."""
+"""Some common code for the Advent of Code puzzle solvers."""
 
 import os
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Sequence, TypeVar
+
+T = TypeVar('T')
 
 
 def data_lines(py_file_name: str) -> Iterator[str]:
@@ -19,7 +21,7 @@ def data_lines(py_file_name: str) -> Iterator[str]:
         yield from f
 
 
-def windowize(seq, n):
+def windowize(seq: Sequence[T], n: int) -> Iterator[Sequence[T]]:
     """Turn a sequence into overlapping windows of n items.
 
     For example, given n = 3 and a, b, c, d, e, f, ... The sequence (a, b, c),

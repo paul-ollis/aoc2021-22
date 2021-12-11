@@ -1,7 +1,7 @@
 """Paul's solution for AOC day 11."""
 
-from typing import List, Set
 from itertools import chain, count
+from typing import List, Set
 
 from lib import data_lines, windowize
 
@@ -10,10 +10,10 @@ class Octopus:
     """An model of an Octopus."""
     def __init__(self, energy: int = 0):
         self.energy = energy
-        self.neighbours = []
+        self.neighbours: List[Octopus] = []
 
     def inc(self):
-        """Increment energy by 1."""
+        """Increment this Octopus's energy level."""
         self.energy += 1
 
     def flash_if_ready(self, flashed: Set['Octopus']):
@@ -56,9 +56,10 @@ def parse_octopus_energies() -> List[List[Octopus]]:
     not have any links set up.
     """
     np = Nonopus(0)
-    octopi = [[]]
+    octopi: List[List[Octopus]] = [[]]
     for line in data_lines(__file__):
-        octopi.append([np] + [Octopus(int(c)) for c in line.strip()] + [np])
+        octopi.append([np, *[Octopus(int(c)) for c in line.strip()], np])
+
     w = len(octopi[1])
     octopi[0] = [np] * w
     octopi.append([np] * w)
@@ -74,7 +75,7 @@ def parse_octopus_energies() -> List[List[Octopus]]:
 
 def run_step(octopi: List[List[Octopus]]):
     """Run the octopi through a single step."""
-    flashed = set()
+    flashed: Set[Octopus] = set()
     for octopus in chain(*octopi):
         octopus.inc()
     for octopus in chain(*octopi):
@@ -92,7 +93,7 @@ def count_flashes(octopi: List[List[Octopus]], n: int):
     print(total_flashes)
 
 
-def find_first_simulflash(octopi: List[Octopus]):
+def find_first_simulflash(octopi: List[List[Octopus]]):
     """Find the first time that all the octopi flash simultaneously."""
     for n in count(1):
         flashes = run_step(octopi)

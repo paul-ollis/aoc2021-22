@@ -13,7 +13,7 @@ def parse_heightmap_data() -> List[List[int]]:
     side walls. Start and end sequences of [9, 9, 9, ...] are also added
     to represent the front and back cave walls.
     """
-    data = [[]]
+    data: List[List[int]] = [[]]
     for line in data_lines(__file__):
         data.append([9] + [int(c) for c in line.strip()] + [9])
     w = len(data[1])
