@@ -1,12 +1,12 @@
 """Paul's solution for AOC day 11."""
 
 from typing import List, Set
-from itertools import chain
+from itertools import chain, count
 
 from lib import data_lines, windowize
 
 
-class Octopus:                         # pylint: disable=too-few-public-methods
+class Octopus:
     """An model of an Octopus."""
     def __init__(self, energy: int = 0):
         self.energy = energy
@@ -16,7 +16,7 @@ class Octopus:                         # pylint: disable=too-few-public-methods
         """Increment energy by 1."""
         self.energy += 1
 
-    def power_neighbours(self, flashed: Set['Octopus']):
+    def flash_if_ready(self, flashed: Set['Octopus']):
         """Flash if ready and then pass flash effect onto neighbours.
 
         :flashed: A set of any Octopus instances that have already flashed.
@@ -26,17 +26,17 @@ class Octopus:                         # pylint: disable=too-few-public-methods
             for octopus in self.neighbours:
                 if octopus not in flashed:
                     octopus.inc()
-                    octopus.power_neighbours(flashed)
+                    octopus.flash_if_ready(flashed)
             self.energy = 0
 
 
-class Nonopus(Octopus):                # pylint: disable=too-few-public-methods
+class Nonopus(Octopus):
     """Something like an Octopus, but with an unchanging energy level."""
     def inc(self):
-        """Increment energy by 1."""
+        """Do *not* increment energy by 1."""
 
 
-def parse_octopus_energies() -> List[List[int]]:
+def parse_octopus_energies() -> List[List[Octopus]]:
     """Parse the octopus energy data.
 
     The data is read into a simple grid of Octopus instances, each with the
@@ -52,7 +52,8 @@ def parse_octopus_energies() -> List[List[int]]:
         [N, O, O, N]
         [N, N, N, N]
 
-    Then each Octopus is linked to its eight neighbours.
+    Then each Octopus is linked to its eight neighbours. Nonopus instance do
+    not have any links set up.
     """
     np = Nonopus(0)
     octopi = [[]]
@@ -71,18 +72,34 @@ def parse_octopus_energies() -> List[List[int]]:
     return octopi
 
 
-def count_flashes(octopi: List[Octopus], n: int):
+def run_step(octopi: List[List[Octopus]]):
+    """Run the octopi through a single step."""
+    flashed = set()
+    for octopus in chain(*octopi):
+        octopus.inc()
+    for octopus in chain(*octopi):
+        octopus.flash_if_ready(flashed)
+    return flashed
+
+
+def count_flashes(octopi: List[List[Octopus]], n: int):
     """Count all the flashes after ``n`` steps."""
     total_flashes = 0
     for _ in range(n):
-        flashed = set()
-        for octopus in chain(*octopi):
-            octopus.inc()
-        for octopus in chain(*octopi):
-            octopus.power_neighbours(flashed)
-        total_flashes += len(flashed)
+        flashes = run_step(octopi)
+        total_flashes += len(flashes)
 
     print(total_flashes)
 
 
+def find_first_simulflash(octopi: List[Octopus]):
+    """Find the first time that all the octopi flash simultaneously."""
+    for n in count(1):
+        flashes = run_step(octopi)
+        if len(flashes) == 100:
+            print(n)
+            return
+
+
 count_flashes(parse_octopus_energies(), 100)
+find_first_simulflash(parse_octopus_energies())
