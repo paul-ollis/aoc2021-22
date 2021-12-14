@@ -28,7 +28,7 @@ def get_population(num_days):
         births = fishes[-1]
         fishes.rotate()
         fishes[2] += births
-    print(sum(fishes))
+    print(f'{sum(fishes):_d}')
 
 
 get_population(80)
