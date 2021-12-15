@@ -22,7 +22,7 @@ solutions = {
     'day11': ('1647', '348'),
     'day12': ('5756', '144603'),
     'day13': ('790', 'PGHZBFJC'),
-    'day14': ('None', 'None'),
+    'day14': ('3342', '3776553567525'),
 }
 
 
@@ -53,11 +53,11 @@ def run_solvers(args):
                 pass
             else:
                 output_parsed = True
-                pref = f'{str(py_file):10}: '
+                pref = f'{str(py_file):0}: '
                 if (a, b) == expected:
-                    print(f'{pref}: Ok   - {a}, {b}')
+                    print(f'{pref}Ok   {a}, {b}')
                 else:
-                    print(f'{pref}: FAIL - {(a, b)} != expected {expected}')
+                    print(f'{pref}FAIL {(a, b)} != expected {expected}')
 
         if not output_parsed:
             print(f'{py_file}: Malformed')

@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Iterator, Sequence, TypeVar
+from typing import Iterator, Sequence, TypeVar, Tuple
 
 T = TypeVar('T')
 
@@ -22,7 +22,7 @@ def data_lines(py_file_name: str) -> Iterator[str]:
             yield line.strip()
 
 
-def windowize(seq: Sequence[T], n: int) -> Iterator[Sequence[T]]:
+def windowize(seq: Sequence[T], n: int) -> Iterator[Tuple[T, ...]]:
     """Turn a sequence into overlapping windows of n items.
 
     For example, given n = 3 and a, b, c, d, e, f, ... The sequence (a, b, c),
