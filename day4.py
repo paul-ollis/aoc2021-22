@@ -16,7 +16,7 @@ class Card:
         self.column_marks: List[List[int]] = [[] for _ in range(5)]
 
     def mark(self, v):
-        """Mark off a vlue for this card."""
+        """Mark off a value for this card."""
         for marks, line in zip(self.line_marks, self.lines):
             if v in line:
                 marks.append(v)
