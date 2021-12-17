@@ -60,12 +60,26 @@ def add_best_risks(grid, corner):
     return xc, yc
 
 
-def refine_risk(grid, recalc_start=None):
+def refine_risk(grid, recalc_start):
     """Yada."""
 
     ymax = len(grid) - 1
     xmax = len(grid[0]) - 1
     changed = 0
+
+    def border_coords(xb, yb):
+        x, y = xmax, ymax
+        for x in range(xmax, xb, -1):
+            yield x, yb
+        for y in range(ymax, yb, -1):
+            yield xb, y
+        yield xb, yb
+
+    def expanding_border_coords(cb):
+        for i, c in enumerate(range(cb, -1, -1)):
+            yield from border_coords(c, c)
+            if i > 3 and changed:
+                break
 
     def calc_risk(x, y, offsets):
         nonlocal changed, recalc_start
@@ -81,15 +95,12 @@ def refine_risk(grid, recalc_start=None):
             grid[y][x] = risk, alt_risk
             changed += 1
             if changed == 1:
-                recalc_start = x, y
+                recalc_start = min(x, y)
 
     recalc_start = recalc_start or (xmax, ymax)
     neighbours = ((0, 1), (1, 0), (0, -1), (-1, 0))
-    for x in range(xmax, -1, -1):
-        for y in range(ymax, -1, -1):
-            if (x, y) != (xmax, ymax):
-                if (x, y) <= recalc_start:
-                    calc_risk(x, y, neighbours)
+    for x, y in expanding_border_coords(recalc_start):
+        calc_risk(x, y, neighbours)
 
     return changed, recalc_start
 
@@ -116,11 +127,11 @@ def find_smallest_risk(expand=False):
 
     n = 0
     cc = 1
-    recalc_start = None
+    recalc_start = len(grid) - 2
     while cc:
         cc, recalc_start = refine_risk(grid, recalc_start)
         n += 1
-        print(n, cc, recalc_start)
+        # print(n, cc, recalc_start)
 
     if debug:
         print()
