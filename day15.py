@@ -29,97 +29,103 @@ def parse_risk_grid(expand=False) -> List[List[int]]:
 
         grid = new_grid
 
+    assert len(grid) == len(grid[0])  # Must be square.
     return grid
 
 
-def add_best_risks(grid, corner):
-    """A properly viable approach, expanding outward from the finish."""
+def add_initial_best_risk(grid, corner):
+    """Add initial figures for the best minimum risk for a grib border.
 
-    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-    xc, yc = corner
-    ylen = len(grid)
-    xlen = len(grid[0])
+    The figures we not be the actual minima, but provide a good starting point
+    for refinement.
+    """
+    dmax = len(grid) - 1
 
     def calc_risk(x, y, offsets):
         risk, _ = grid[y][x]
         choices = []
         for dx, dy in offsets:
             xc, yc = x + dx, y + dy
-            if xc < xlen and yc < ylen:
+            if xc <= dmax and yc <= dmax:
                 choices.append(grid[yc][xc][1])
         grid[y][x] = risk, min(risk + total for total in choices)
 
-    for x, y in [(xx, yc - 1) for xx in range(xc, xlen)]:
-        calc_risk(x, y, [(0, 1)])
-    for x, y in [(xc - 1, yy) for yy in range(yc, ylen)]:
-        calc_risk(x, y, [(1, 0)])
-    calc_risk(xc - 1, yc - 1, [(1, 0), (0, 1)])
-
-    xc = max(xc - 1, 0)
-    yc = max(yc - 1, 0)
-    return xc, yc
+    for x, y in border_coords(corner, dmax):
+        calc_risk(x, y, [(0, 1), (1, 0)])
 
 
-def refine_risk(grid, recalc_start):
-    """Yada."""
+def top_border_coords(corner, dmax):
+    """Yield coordinate for the top border for a given corner."""
+    for x in range(dmax, corner, -1):
+        yield x, corner
 
-    ymax = len(grid) - 1
-    xmax = len(grid[0]) - 1
+
+def left_border_coords(corner, dmax):
+    """Yield coordinate for the left border for a given corner."""
+    for y in range(dmax, corner, -1):
+        yield corner, y
+
+
+def border_coords(corner, dmax):
+    """Yield coordinate for the border defined by a given corner."""
+    yield from top_border_coords(corner, dmax)
+    yield from left_border_coords(corner, dmax)
+    yield corner, corner
+
+
+def refine_risk(grid, corner):
+    """Visit each potentially unstable coord, refining its min risk."""
+
+    dmax = len(grid) - 1
     changed = 0
 
-    def border_coords(xb, yb):
-        x, y = xmax, ymax
-        for x in range(xmax, xb, -1):
-            yield x, yb
-        for y in range(ymax, yb, -1):
-            yield xb, y
-        yield xb, yb
-
-    def expanding_border_coords(cb):
-        for i, c in enumerate(range(cb, -1, -1)):
-            yield from border_coords(c, c)
+    def expanding_border_coords(corner):
+        for i, c in enumerate(range(corner, -1, -1)):
+            yield from border_coords(c, dmax)
+            # TODO: This escape uses an un-verified heuristic. One day it would
+            #       be good to verify it, but it seems to work and I could add
+            #       a full grid pass to prove the grid is stable.
             if i > 3 and changed:
                 break
 
     def calc_risk(x, y, offsets):
-        nonlocal changed, recalc_start
+        nonlocal changed, corner
 
         risk, min_risk = grid[y][x]
         choices = []
         for dx, dy in offsets:
             xc, yc = x + dx, y + dy
-            if 0 <= xc <= xmax and 0 <= yc <= ymax:
+            if 0 <= xc <= dmax and 0 <= yc <= dmax:
                 choices.append(grid[yc][xc][1])
         alt_risk = min(risk + total for total in choices)
         if alt_risk < min_risk:
             grid[y][x] = risk, alt_risk
             changed += 1
             if changed == 1:
-                recalc_start = min(x, y)
+                corner = min(x, y)
 
-    recalc_start = recalc_start or (xmax, ymax)
     neighbours = ((0, 1), (1, 0), (0, -1), (-1, 0))
-    for x, y in expanding_border_coords(recalc_start):
+    for x, y in expanding_border_coords(corner):
         calc_risk(x, y, neighbours)
 
-    return changed, recalc_start
+    return changed, corner
 
 
 def find_smallest_risk(expand=False):
-    """Yada."""
+    """Find the value for the route with the lowest risk."""
     input_grid = parse_risk_grid(expand)
     grid = [[[risk, None] for risk in row] for row in input_grid]
 
     # Mark the destination cell with its minimum risk and make it our
     # initial wall.
-    y = len(grid) - 1
-    x = len(grid[0]) - 1
+    dmax = len(grid) - 1
+    x = y = dmax
     risk, _ = grid[y][x]
     grid[y][x] = risk, risk
-    corner = x, y
+    corner = dmax
 
-    while corner != (0, 0):
-        corner = add_best_risks(grid, corner)
+    for corner in range(dmax - 1, -1, -1):
+        add_initial_best_risk(grid, corner)
 
     if debug:
         for row in grid:
@@ -127,11 +133,10 @@ def find_smallest_risk(expand=False):
 
     n = 0
     cc = 1
-    recalc_start = len(grid) - 2
+    corner = dmax - 1
     while cc:
-        cc, recalc_start = refine_risk(grid, recalc_start)
+        cc, corner = refine_risk(grid, corner)
         n += 1
-        # print(n, cc, recalc_start)
 
     if debug:
         print()
