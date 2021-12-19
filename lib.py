@@ -33,3 +33,11 @@ def windowize(seq: Sequence[T], n: int) -> Iterator[Tuple[T, ...]]:
         for _ in range(i):
             next(it)
     return zip(*iterators)
+
+
+def watch_counter(n:int):
+    """A generator that asserts if executed too many times."""
+    while True:
+        assert n > 0
+        n -= 1
+        yield n
