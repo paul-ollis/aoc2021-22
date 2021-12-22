@@ -40,11 +40,33 @@ def add_infinity_border(image: Image, pixel: Bit) -> Image:
 
 
 def trim_unprocessed_infinity(image: Image) -> Image:
-    """Trim the part of th infinity border that was not processed.
+    """Trim the part of the infinity border that was not processed.
 
-    This is a single pixed border around the image.
+    This is a single pixel border around the image.
     """
     return [row[1:-1] for row in image[1:-1]]
+
+
+def trim_unlit_border(image: Image) -> Image:
+    """Trim any unlit border from the image."""
+    new_image = image
+    for i, row in enumerate(new_image):
+        if any(row):
+            new_image = new_image[i:]
+            break
+    while not any(new_image[-1]):
+        new_image.pop()
+
+    start = min(row.index(1) for row in new_image)
+    for row in new_image:
+        row.reverse()
+    end = min(row.index(1) for row in new_image)
+    for row in new_image:
+        row.reverse()
+
+    n = len(image[0]) - end
+    new_image = [row[start:n] for row in new_image]
+    return new_image
 
 
 def new_blank_image(image: Image):
@@ -83,11 +105,13 @@ def solve(count: int):
     program, image = parse_input()
 
     border_value = 0
-    for _ in range(count):
+    for i in range(count):
         image = add_infinity_border(image, border_value)
         image = process(image, program)
         image = trim_unprocessed_infinity(image)
         border_value = image[0][0]
+        if i % 2 == 1:
+            image = trim_unlit_border(image)
 
     # dump_image(image)
 
