@@ -41,3 +41,19 @@ def watch_counter(n:int):
         assert n > 0
         n -= 1
         yield n
+
+
+def range_intersection(ra: range, rb: range) -> range:
+    """Calculate the intersection of two ranges.
+
+    This only works for ranges with step == 1.
+
+    :return:
+        A new range that represents the overlap of the two ranges. The range
+        (r) will be empty if there is no overlap, in which case
+
+            range(r.end, r.start)
+
+        is the range that fits between ra and rb.
+    """
+    return range(max(ra.start, rb.start), min(ra.stop, rb.stop))
