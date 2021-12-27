@@ -19,7 +19,7 @@ def data_lines(py_file_name: str) -> Iterator[str]:
     data = os.environ.get('AOC_DEVEL', 'data')
     with open(f'{data}/{Path(py_file_name).stem}.txt', encoding='utf8') as f:
         for line in f:
-            yield line.strip()
+            yield line.rstrip()
 
 
 def windowize(seq: Sequence[T], n: int) -> Iterator[Tuple[T, ...]]:
